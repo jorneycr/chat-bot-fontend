@@ -26,6 +26,8 @@ const Chatbot = () => {
                 try {
                     const storedToken = localStorage.getItem('token');
                     if (!storedToken) {
+                        console.log(apiUrlAuth + ' ' + apiAuthEmail + ' ' + apiAuthPass);
+                        
                         const response = await axios.post(apiUrlAuth, { email: apiAuthEmail, password: apiAuthPass });
                         const token = response.data.token;
                         localStorage.setItem('token', token);
