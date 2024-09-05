@@ -2,8 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import './index.css';
 
-const apiUrlAuth = process.env.REACT_APP_API_URL_LOGIN;
-const apiUrlChat = process.env.REACT_APP_API_URL_CHAT;
+const apiUrlAuth = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_API_URL_LOGIN_PROD : process.env.REACT_APP_API_URL_LOGIN_DEV;
+const apiUrlChat = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_API_URL_CHAT_PROD : process.env.REACT_APP_API_URL_CHAT_DEV;
 const apiAuthEmail = process.env.REACT_APP_EMAIL;
 const apiAuthPass = process.env.REACT_APP_PASSWORD;
 
