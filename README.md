@@ -24,7 +24,7 @@ Sigue estos pasos para configurar y ejecutar el proyecto en tu entorno local.
 ### 1. Clona el repositorio:
 
 ```bash
-git clone https://github.com/tu-usuario/minichatbot.git
+git clone https://github.com/jorneycr/chat-bot-fontend
 
 ```
 
