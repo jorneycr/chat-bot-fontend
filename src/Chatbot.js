@@ -27,12 +27,18 @@ const Chatbot = () => {
                     { user: 'Bot', text: 'Hola! Soy el bot. Escribe /preguntas para ver las preguntas disponibles' }
                 ]);
                 welcomeSentRef.current = true;
+                
                 try {
                     const storedToken = localStorage.getItem('token');
-                    if (!storedToken) {
+                    const creationTime = localStorage.getItem('creationToken');
+                    const currentTime = new Date().getTime();
+    
+                    // Si el token no existe o ha pasado más de una hora desde su creación
+                    if (!storedToken || !creationTime || (currentTime - parseInt(creationTime)) > 3600000) {
                         const response = await axios.post(apiUrlAuth, { email: apiAuthEmail, password: apiAuthPass });
                         const token = response.data.token;
                         localStorage.setItem('token', token);
+                        localStorage.setItem('creationToken', currentTime.toString());
                         console.log('Token nuevo ' + token);
                     } else {
                         console.log('Token almacenado ' + storedToken);
@@ -42,9 +48,9 @@ const Chatbot = () => {
                 }
             }
         };
-
+    
         fetchToken();
-    }, []);
+    }, []);    
 
     useEffect(() => {
         if (chatWindowRef.current) {
@@ -105,6 +111,7 @@ const Chatbot = () => {
                     <br /><br />
                     ¡Comienza a interactuar ahora!
                 </p>
+                <p></p>
             </section>
     
             {!isOpen && (
