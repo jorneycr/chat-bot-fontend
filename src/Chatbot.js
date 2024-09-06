@@ -10,13 +10,17 @@ const apiAuthPass = process.env.REACT_APP_PASSWORD;
 const Chatbot = () => {
     const [messages, setMessages] = useState([]);
     const [userInput, setUserInput] = useState('');
+    const [isOpen, setIsOpen] = useState(true);
     const welcomeSentRef = useRef(false);
     const chatWindowRef = useRef(null);
 
-    // Agregar mensaje de bienvenida cuando el componente se monta y manejo de token
+    //visibilidad del chat
+    const toggleChat = () => {
+        setIsOpen(!isOpen);
+    };
+
     useEffect(() => {
         const fetchToken = async () => {
-
             if (!welcomeSentRef.current) {
                 setMessages(prevMessages => [
                     ...prevMessages,
@@ -26,7 +30,6 @@ const Chatbot = () => {
                 try {
                     const storedToken = localStorage.getItem('token');
                     if (!storedToken) {
-                                                
                         const response = await axios.post(apiUrlAuth, { email: apiAuthEmail, password: apiAuthPass });
                         const token = response.data.token;
                         localStorage.setItem('token', token);
@@ -34,7 +37,6 @@ const Chatbot = () => {
                     } else {
                         console.log('Token almacenado ' + storedToken);
                     }
-                    
                 } catch (error) {
                     console.error('Error al obtener el token:', error);
                 }
@@ -44,17 +46,14 @@ const Chatbot = () => {
         fetchToken();
     }, []);
 
-    // Desplazar hacia abajo el chat cuando se agregue un nuevo mensaje
     useEffect(() => {
         if (chatWindowRef.current) {
             chatWindowRef.current.scrollTop = chatWindowRef.current.scrollHeight;
         }
     }, [messages]);
 
-    // Envio de mensaje, elimina espacios, guarda los mensajes existentes y agrega nuevo en la UI, envio de request con el token obtenido
     const sendMessage = async () => {
         const trimmedInput = userInput.trim();
-
         if (!trimmedInput) return;
 
         const userMessage = { user: 'Usuario', text: trimmedInput };
@@ -67,7 +66,14 @@ const Chatbot = () => {
             };
             const response = await axios.post(apiUrlChat, { question: trimmedInput }, config);
 
-            const botMessage = { user: 'Bot', text: Array.isArray(response.data) ? response.data.join(',\n') : response.data.answer };
+            const botMessage = { user: 'Bot', text: Array.isArray(response.data) ? (
+                <div>
+                    <p>Estas son algunas preguntas existentes:</p>
+                    <ul>
+                        {response.data.map((q, i) => <li key={i}>{q}</li>)}
+                    </ul>
+                </div>
+            ) : response.data.answer };
             setMessages(prevMessages => [...prevMessages, botMessage]);
         } catch (error) {
             console.error('Error al enviar mensaje:', error);
@@ -85,30 +91,60 @@ const Chatbot = () => {
     };
 
     return (
-        <div className="chatbot-container">
-            <h1 className="chatbot-title">Mini Chatbot</h1>
-            <div className="chat-window" ref={chatWindowRef}>
-                {messages.map((message, index) => (
-                    <div
-                        key={index}
-                        className={`chat-message ${message.user === 'Bot' ? 'bot-message' : 'user-message'}`}
-                    >
-                        <p><strong>{message.user}:</strong> {message.text}</p>
-                    </div>
-                ))}
-            </div>
-            <div className="input-container">
-                <input
-                    className="chat-input"
-                    type="text"
-                    value={userInput}
-                    onChange={e => setUserInput(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    placeholder="Escribe tu pregunta..."
-                />
-                <button className="send-button" onClick={sendMessage}>Enviar</button>
-            </div>
-        </div>
+        <section>
+            <section className="welcome-message">
+                <p>
+                    Mini Chatbot<br /><br />
+                    Este proyecto es un Mini Chatbot desarrollado en React que permite a los usuarios interactuar con un chatbot a través de una interfaz sencilla. El bot puede responder preguntas y realizar otras funciones básicas. La comunicación entre el frontend (React) y el backend (API) se realiza mediante Axios.                    <br /><br />
+                    <strong>Instrucciones:</strong>
+                    <br /><br />
+                    1. Escribe tu mensaje o pregunta en el campo de texto en la parte inferior.<br /><br />
+                    2. Presiona "Enter" o haz clic en el botón "Enviar" para mandar tu mensaje.<br /><br />
+                    3. El chatbot responderá automáticamente a tus preguntas.<br /><br />
+                    4. Si deseas ver una lista de preguntas disponibles, escribe <code>/preguntas</code>.
+                    <br /><br />
+                    ¡Comienza a interactuar ahora!
+                </p>
+            </section>
+    
+            {!isOpen && (
+                <button className="open-chat-button" onClick={toggleChat}>
+                    💬 Chat
+                </button>
+            )}
+    
+            {isOpen && (
+                <section className="chatbot-container">
+                    <header className="chat-header">
+                        <h1 className="chatbot-title">Mini Chatbot</h1>
+                        <button className="close-button" onClick={toggleChat}>✖</button>
+                    </header>
+    
+                    <section className="chat-window" ref={chatWindowRef}>
+                        {messages.map((message, index) => (
+                            <article
+                                key={index}
+                                className={`chat-message ${message.user === 'Bot' ? 'bot-message' : 'user-message'}`}
+                            >
+                                <p><strong>{message.user}:</strong> {message.text}</p>
+                            </article>
+                        ))}
+                    </section>
+    
+                    <footer className="input-container">
+                        <input
+                            className="chat-input"
+                            type="text"
+                            value={userInput}
+                            onChange={e => setUserInput(e.target.value)}
+                            onKeyDown={handleKeyDown}
+                            placeholder="Escribe tu pregunta..."
+                        />
+                        <button className="send-button" onClick={sendMessage}>Enviar</button>
+                    </footer>
+                </section>
+            )}
+        </section>
     );
 };
 
